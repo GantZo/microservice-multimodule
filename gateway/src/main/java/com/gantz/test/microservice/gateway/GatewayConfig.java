@@ -12,6 +12,7 @@ public class GatewayConfig {
     public RouteLocator customRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(r -> r.path("/api/category/**").uri("lb://category-service/"))
+                .route(r -> r.path("/api/videoInfo/**").uri("lb://video-service"))
                 .build();
     }
 

@@ -58,7 +58,7 @@ public class VideoInfoCategoryResource {
                 .map(dto -> new VideoInfoCategory(dto.getVideoInfoId(), dto.getCategoryId()))
                 .map(videoInfoCategoryRepository::save)
                 .map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId()))
-                .toList();
+                .collect(Collectors.toList());
         inBase.stream()
                 .filter(f -> !toDelete.contains(f))
                 .forEach(created::add);

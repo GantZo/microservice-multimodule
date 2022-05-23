@@ -7,14 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/videoInfo/videoInfoCategory")
@@ -28,7 +27,7 @@ public class VideoInfoCategoryResource {
         Page<VideoInfoCategory> all = videoInfoCategoryRepository.findAll(pageable);
 
         return new PageImpl<>(
-                all.stream().map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId())).collect(Collectors.toList()),
+                all.stream().map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId())).toList(),
                 all.getPageable(),
                 all.getTotalElements()
         );
@@ -39,7 +38,31 @@ public class VideoInfoCategoryResource {
         return videoInfoCategoryRepository.findAllByVideoInfoId(videoInfoId).stream()
                 .map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId()))
                 .sorted(Comparator.comparing(VideoInfoCategoryDTO::getCategoryId))
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @PostMapping("/{videoInfoId}")
+    public List<VideoInfoCategoryDTO> update(@PathVariable("videoInfoId") Long videoInfoId, @RequestBody List<VideoInfoCategoryDTO> list) {
+        if (list == null) {
+            throw new RuntimeException("u must specify category list!");
+        }
+        List<VideoInfoCategoryDTO> inBase = videoInfoCategoryRepository.findAllByVideoInfoId(videoInfoId).stream()
+                .map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId())).toList();
+        List<VideoInfoCategoryDTO> toDelete = inBase.stream().filter(f -> !list.contains(f)).toList();
+                toDelete.forEach(dto -> videoInfoCategoryRepository
+                        .deleteById(VideoInfoCategory.IdClass.of(dto.getVideoInfoId(), dto.getCategoryId()))
+                );
+        List<VideoInfoCategoryDTO> created = list.stream()
+                .filter(f -> !inBase.contains(f))
+                .distinct()
+                .map(dto -> new VideoInfoCategory(dto.getVideoInfoId(), dto.getCategoryId()))
+                .map(videoInfoCategoryRepository::save)
+                .map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId()))
+                .toList();
+        inBase.stream()
+                .filter(f -> !toDelete.contains(f))
+                .forEach(created::add);
+        return created;
     }
 
 }

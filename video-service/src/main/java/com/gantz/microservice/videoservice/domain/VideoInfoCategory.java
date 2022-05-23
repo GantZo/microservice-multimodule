@@ -32,6 +32,11 @@ public class VideoInfoCategory {
     public VideoInfoCategory() {
     }
 
+    public VideoInfoCategory(Long videoInfoId, Integer categoryId) {
+        this.videoInfoId = videoInfoId;
+        this.categoryId = categoryId;
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

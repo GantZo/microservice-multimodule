@@ -27,7 +27,7 @@ public class VideoInfoResource {
         Page<VideoInfo> all = videoInfoRepository.findAll(pageable);
 
         return new PageImpl<>(
-                all.stream().map(p -> new VideoInfoDTO(p.getId(), p.getTitle())).collect(Collectors.toList()),
+                all.stream().map(p -> new VideoInfoDTO(p.getId(), p.getTitle())).toList(),
                 all.getPageable(),
                 all.getTotalElements()
         );

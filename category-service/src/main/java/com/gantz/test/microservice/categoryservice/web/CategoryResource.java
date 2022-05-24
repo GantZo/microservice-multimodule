@@ -47,7 +47,7 @@ public class CategoryResource {
                 .orElseThrow(() -> new RuntimeException("There is no id"));
     }
 
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<CategoryDTO>> findAllByIdIn(@RequestParam("ids") List<Integer> ids) {
         List<CategoryDTO> categoryDTOS = Optional.ofNullable(ids).filter(f -> !f.isEmpty())
                 .map(categoryRepository::findAllById)
@@ -56,7 +56,7 @@ public class CategoryResource {
         return new ResponseEntity<>(categoryDTOS, HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping("/")
     public ResponseEntity<CategoryDTO> create(@RequestBody CategoryDTO categoryDTO) {
         return Optional.ofNullable(categoryDTO)
                 .filter(f -> Objects.isNull(f.getId()))
@@ -67,7 +67,7 @@ public class CategoryResource {
                 .orElseThrow(() -> new RuntimeException("id must be not null"));
     }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<CategoryDTO> update(@RequestBody CategoryDTO categoryDTO) {
         return Optional.ofNullable(categoryDTO)
                 .filter(f -> Objects.nonNull(f.getId()))

@@ -15,7 +15,7 @@ public interface CategoryClient {
     @RequestMapping(method = RequestMethod.GET, value = "/api/category/list")
     List<CategoryDTO> getCategories();
 
-    @RequestMapping(method = RequestMethod.GET, value = "/api/category")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/category/")
     List<CategoryDTO> findAllByIdIn(@RequestParam("ids") Collection<Integer> ids);
 
 }

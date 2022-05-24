@@ -1,8 +1,12 @@
 package com.gantz.microservice.videoservice.web;
 
 import com.gantz.microservice.videoservice.domain.VideoInfo;
+import com.gantz.microservice.videoservice.domain.VideoInfoCategory;
 import com.gantz.microservice.videoservice.dto.VideoInfoDTO;
+import com.gantz.microservice.videoservice.feign.CategoryClient;
 import com.gantz.microservice.videoservice.repository.VideoInfoRepository;
+import com.gantz.microservice.videoservice.vm.CategoryVM;
+import com.gantz.microservice.videoservice.vm.VideoInfoVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/videoInfo")
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
 public class VideoInfoResource {
 
     private final VideoInfoRepository videoInfoRepository;
+    private final CategoryClient categoryClient;
 
     @GetMapping("/list")
     public Page<VideoInfoDTO> findAll(Pageable pageable) {
@@ -34,9 +39,15 @@ public class VideoInfoResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<VideoInfoDTO> findById(@PathVariable("id") Long id) {
+    public ResponseEntity<VideoInfoVM> findById(@PathVariable("id") Long id) {
         return videoInfoRepository.findById(id)
-                .map(p -> new VideoInfoDTO(p.getId(), p.getTitle()))
+                .map(videoInfo -> {
+                    List<Integer> categoryIds = videoInfo.getVideoInfoCategories().stream()
+                            .map(VideoInfoCategory::getCategoryId).toList();
+                    List<CategoryVM> categoryVMS = categoryClient.findAllByIdIn(categoryIds).stream()
+                            .map(p -> new CategoryVM(p.getId(), p.getTitle())).toList();
+                    return new VideoInfoVM(videoInfo.getId(), videoInfo.getTitle(), categoryVMS);
+                })
                 .map(p -> new ResponseEntity<>(p, HttpStatus.OK))
                 .orElseThrow(() -> new RuntimeException("id not found!"));
     }

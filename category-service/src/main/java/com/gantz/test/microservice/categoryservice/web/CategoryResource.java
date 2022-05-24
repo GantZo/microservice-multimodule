@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -48,6 +45,15 @@ public class CategoryResource {
                 .map(p -> new CategoryDTO(p.getId(), p.getTitle()))
                 .map(p -> new ResponseEntity<>(p, HttpStatus.OK))
                 .orElseThrow(() -> new RuntimeException("There is no id"));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CategoryDTO>> findAllByIdIn(@RequestParam("ids") List<Integer> ids) {
+        List<CategoryDTO> categoryDTOS = Optional.ofNullable(ids).filter(f -> !f.isEmpty())
+                .map(categoryRepository::findAllById)
+                .map(list -> list.stream().map(p -> new CategoryDTO(p.getId(), p.getTitle())).toList())
+                .orElseGet(Collections::emptyList);
+        return new ResponseEntity<>(categoryDTOS, HttpStatus.OK);
     }
 
     @PutMapping

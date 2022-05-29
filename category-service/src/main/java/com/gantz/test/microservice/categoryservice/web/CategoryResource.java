@@ -5,7 +5,6 @@ import com.gantz.test.microservice.categoryservice.dto.CategoryDTO;
 import com.gantz.test.microservice.categoryservice.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +23,7 @@ public class CategoryResource {
     @GetMapping("/page")
     public Page<CategoryDTO> findAll(Pageable pageable) {
         Page<Category> all = categoryRepository.findAll(pageable);
-        return new PageImpl<>(
-                all.stream().map(p -> new CategoryDTO(p.getId(), p.getTitle())).collect(Collectors.toList()),
-                all.getPageable(),
-                all.getTotalElements()
-        );
+        return all.map(p -> new CategoryDTO(p.getId(), p.getTitle()));
     }
 
     @GetMapping("/list")

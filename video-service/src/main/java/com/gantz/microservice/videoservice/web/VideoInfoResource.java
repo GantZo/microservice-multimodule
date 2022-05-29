@@ -9,7 +9,6 @@ import com.gantz.microservice.videoservice.vm.CategoryVM;
 import com.gantz.microservice.videoservice.vm.VideoInfoVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +29,7 @@ public class VideoInfoResource {
     @GetMapping("/list")
     public Page<VideoInfoDTO> findAll(Pageable pageable) {
         Page<VideoInfo> all = videoInfoRepository.findAll(pageable);
-
-        return new PageImpl<>(
-                all.stream().map(p -> new VideoInfoDTO(p.getId(), p.getTitle())).toList(),
-                all.getPageable(),
-                all.getTotalElements()
-        );
+        return all.map(p -> new VideoInfoDTO(p.getId(), p.getTitle()));
     }
 
     @GetMapping("/{id}")

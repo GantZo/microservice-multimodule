@@ -5,7 +5,6 @@ import com.gantz.microservice.videoservice.dto.VideoInfoCategoryDTO;
 import com.gantz.microservice.videoservice.repository.VideoInfoCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,12 +22,7 @@ public class VideoInfoCategoryResource {
     @GetMapping("/list")
     public Page<VideoInfoCategoryDTO> findAll(Pageable pageable) {
         Page<VideoInfoCategory> all = videoInfoCategoryRepository.findAll(pageable);
-
-        return new PageImpl<>(
-                all.stream().map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId())).toList(),
-                all.getPageable(),
-                all.getTotalElements()
-        );
+        return all.map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId()));
     }
 
     @GetMapping
@@ -47,9 +41,9 @@ public class VideoInfoCategoryResource {
         List<VideoInfoCategoryDTO> inBase = videoInfoCategoryRepository.findAllByVideoInfoId(videoInfoId).stream()
                 .map(p -> new VideoInfoCategoryDTO(p.getVideoInfoId(), p.getCategoryId())).toList();
         List<VideoInfoCategoryDTO> toDelete = inBase.stream().filter(f -> !list.contains(f)).toList();
-                toDelete.forEach(dto -> videoInfoCategoryRepository
-                        .deleteById(VideoInfoCategory.IdClass.of(dto.getVideoInfoId(), dto.getCategoryId()))
-                );
+        toDelete.forEach(dto -> videoInfoCategoryRepository
+                .deleteById(VideoInfoCategory.IdClass.of(dto.getVideoInfoId(), dto.getCategoryId()))
+        );
         List<VideoInfoCategoryDTO> created = list.stream()
                 .filter(f -> !inBase.contains(f))
                 .distinct()
